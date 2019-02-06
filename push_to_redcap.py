@@ -42,6 +42,20 @@ def open_file(filepath):
     except:
         raise SystemExit("ERROR: Check path and permissions of file you are trying to upload")
 
+def upload_stagnant_data(data):
+    """
+    """
+    try:
+        lines = data.read().splitlines()
+        stagnant_data = []
+        for line in lines:
+            if ":" in line:
+                stangnant_data.append(line)
+        return stagnant_data
+    
+    except:
+        raise SystemExit("Something wrong here")
+
 def add_to_parser():
     """
     Method to add arguments to default parser
@@ -68,6 +82,8 @@ def execute():
     project = redcap_project_access(OPTIONS.API_KEY)
     forms = get_form_names(project)
     doc = open_file(OPTIONS.path)
+    data = upload_stagnant_data(doc)
+    print data
 
 if __name__ == '__main__':
     execute()
