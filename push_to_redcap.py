@@ -6,6 +6,7 @@ import os
 import sys
 import argparse
 import logging as LOGGER
+import re
 
 def redcap_project_access(API_KEY):
     """
@@ -42,19 +43,50 @@ def open_file(filepath):
     except:
         raise SystemExit("ERROR: Check path and permissions of file you are trying to upload")
 
-def upload_stagnant_data(data):
+def list_data_by_line(data):
     """
     """
-    try:
-        lines = data.read().splitlines()
-        stagnant_data = []
-        for line in lines:
-            if ":" in line:
-                stangnant_data.append(line)
-        return stagnant_data
-    
-    except:
-        raise SystemExit("Something wrong here")
+    lines = data.read().splitlines()
+    stagnant_data = []
+    table_data = []
+    for line in lines:
+        if ":" in line:
+            stagnant_data.append(line)
+        else:
+            table_data.append(line)
+    return table_data,stagnant_data
+
+def table_to_dict(table_data):
+    """
+
+    """
+    roi_list = []
+    table_values = get_values_and_variables(table_data)
+    return table_values
+
+def get_values_and_variables(table_data):
+    """
+    """
+    table_values = []
+    for line in table_data:
+        if "ROI" in line or "VOI" in line:
+            headers = line
+            headers = re.split(r'\t+',headers)
+        elif line!='':
+            line = re.split(r'\t+',line)
+            dictionary = dict(zip(headers,line))
+            for key in dictionary.keys():
+                table_values.append(dictionary.get('ROI_Name')+"_"+key+ \
+                                    " : "+dictionary.get(key))
+    return table_values
+
+#def split_by_tab():
+
+
+def replace_variable_name():
+    """
+    """
+
 
 def add_to_parser():
     """
@@ -66,6 +98,8 @@ def add_to_parser():
                         help='API key to REDCap Database')
     parser.add_argument("-f","--file",dest='path',default=None, \
                         help = 'path of file that needs to be uploaded')
+    parser.add_argument("-s","--study",dest='form',default=None,\
+                        help='Name of study on redcap. Replace spaces with _')
     return parser
 
 def execute():
@@ -82,8 +116,8 @@ def execute():
     project = redcap_project_access(OPTIONS.API_KEY)
     forms = get_form_names(project)
     doc = open_file(OPTIONS.path)
-    data = upload_stagnant_data(doc)
-    print data
+    table_data,stagnant_data = list_data_by_line(doc)
+    formatted_table_data = table_to_dict(table_data)
 
 if __name__ == '__main__':
     execute()
