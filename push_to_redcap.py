@@ -35,6 +35,9 @@ def get_form_names(project):
 
 def open_file(filepath):
     """
+    Opens file and returns the file object ready to be read.
+    :param filepath:string of path to file
+    :return: file object
     """
     try:
         xl_file = open(filepath,"r")
@@ -45,6 +48,9 @@ def open_file(filepath):
 
 def list_data_by_line(data):
     """
+    Splits the stagnant and table data and returns a tuple
+    :param data:file object containing all the values from the spreadsheet
+    :return: tuple(list,list) table_data and stagnant_data
     """
     lines = data.read().splitlines()
     stagnant_data = []
@@ -58,16 +64,26 @@ def list_data_by_line(data):
 
 def table_to_dict(table_data,OPTIONS):
     """
-
+    :param table_data:values from the spreadsheet that are 
+                    in a table like a 2 dimensional array
+    :param OPTIONS:parsed arguments from the user
+    :return: dict
     """
-    roi_list = []
     table_values = get_values_and_variables(table_data,OPTIONS)
     return table_values
 
 def get_values_and_variables(table_data,OPTIONS):
     """
+    Separates the headers and values from table_data.
+    Reads the settings file and fetches the variable names and 
+    makes a dictionary with redcap field variable names and corresponding values 
+    from the table data
+    :param table_data: passed from table_to_dict method
+    :parvalues from the spreadsheet that aream OPTIONS: passed from table_to_dict method
+    :return:dict of redcap ready values and keys of table data
     """
     table_values = []
+    table_dict = {}
     settings_dict = read_settings_file(OPTIONS)
     for line in table_data:
         if "ROI" in line or "VOI" in line:
@@ -78,18 +94,60 @@ def get_values_and_variables(table_data,OPTIONS):
             dictionary = dict(zip(headers,line))
             for key in dictionary.keys():
                 if key in settings_dict.keys():
-                    table_values.append(dictionary.get('ROI_Name')+"_"+ \
-                               settings_dict.get(key)+" : "+dictionary.get(key))
-    return table_values
+                    table_dict.update({((dictionary.get('ROI_Name')+"_"+ \
+                            settings_dict.get(key)),dictionary.get(key))})
+    return table_dict
 
-def update_redcap(table_values,settings_dict,project):
+def format_stagnant_data(stagnant_data,settings_file):
     """
+    Takes the stagnant data, refers the settings file and
+    gets the stagnant data in a dictionary with redcap field variable
+    names as keys.
+    :param stagnant_data:list where each element is a line from the stagnant section
+                            of the spreadsheet
+    :param settings_file:file object of settings file referenced by user
+    :return: dict of redcap ready values and keys of stagnant data
     """
-#    for pair in table_values:
+    lines = {}
+    for line in stagnant_data:
+        if line!='':
+            line_key = re.split(r":+",line)[0].strip()
+            if line_key in settings_file.keys():
+                lines.update({(settings_file.get(line_key), \
+                  re.split(r":+",line)[1].strip())})
+            if line_key=="Patient ID":
+                lines.update({("record_id",re.split(r":+",line)[1].strip())})
+    return lines
 
+
+def upload_to_redcap(project,stagnant_data,formatted_data,OPTIONS):
+    """
+    Concatenates stagnant and table data in a dictionary. Adds dict to a list 
+    where multiple records may exist. Pushes the list to redcap
+    :param project:redcap Project
+    :param stagnant_data:list of stagnant data
+    :param formatted_data:dict of table data
+    :param OPTIONS: parsed arguments from user
+    :return:returns the count after attempting to import data to redcap project
+    """
+    redcap_dict = format_stagnant_data(stagnant_data,\
+         settings_file = read_settings_file(OPTIONS))
+    redcap_dict.update(formatted_data)
+    records = [redcap_dict]
+    try:
+        log_var= project.import_records(records,overwrite='normal' \
+                                    ,return_format='json',date_format='MDY')
+        LOGGER.info("Upload COMPLETE!")
+    except redcap.RedcapError as redcaperror:
+        raise SystemExit(redcaperror)
+    return log_var
 
 def read_settings_file(OPTIONS):
     """
+    Reads settings file and returns a dict with replacement pairs
+    from the settings file
+    :param OPTIONS: arguments parsed from user input
+    :return: dict with settings file data
     """
     settings = open_file(OPTIONS.settings)
     settings_file = settings.read()
@@ -112,9 +170,7 @@ def add_to_parser():
                         help='API key to REDCap Database')
     parser.add_argument("-f","--file",dest='path',default=None, \
                         help = 'path of file that needs to be uploaded')
-    parser.add_argument("-s","--study",dest='form',default=None,\
-                        help='Name of study on redcap. Replace spaces with _')
-    parser.add_argument("-i","--settings",dest='settings',default=None,\
+    parser.add_argument("-s","--settings",dest='settings',default=None,\
                         help='path to settings file of the study')
     return parser
 
@@ -134,7 +190,7 @@ def execute():
     doc = open_file(OPTIONS.path)
     table_data,stagnant_data = list_data_by_line(doc)
     formatted_table_data = table_to_dict(table_data,OPTIONS)
-    upload_to_redcap(project,stagnant_data,formatted_table_data)
+    log=upload_to_redcap(project,stagnant_data,formatted_table_data,OPTIONS)
 
 if __name__ == '__main__':
     execute()
