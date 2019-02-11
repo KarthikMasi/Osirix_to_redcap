@@ -41,7 +41,6 @@ def open_file(filepath):
     """
     try:
         xl_file = open(filepath,"r")
-        LOGGER.info("Opening "+filepath)
         return xl_file
     except:
         raise SystemExit("ERROR: Check path and permissions of file you are trying to upload")
@@ -79,7 +78,7 @@ def get_values_and_variables(table_data,OPTIONS):
     makes a dictionary with redcap field variable names and corresponding values 
     from the table data
     :param table_data: passed from table_to_dict method
-    :parvalues from the spreadsheet that aream OPTIONS: passed from table_to_dict method
+    :param OPTIONS: parsed arguments form terminal
     :return:dict of redcap ready values and keys of table data
     """
     table_values = []
@@ -91,11 +90,20 @@ def get_values_and_variables(table_data,OPTIONS):
             headers = re.split(r'\t+',headers)
         elif line!='':
             line = re.split(r'\t+',line)
-            dictionary = dict(zip(headers,line))
+            try:
+                dictionary = dict(zip(headers,line))
+            except UnboundLocalError:
+                LOGGER.error("The xls file corrupted "+ OPTIONS.path)
+                raise SystemExit("Soft Exit")
             for key in dictionary.keys():
+                if dictionary.has_key('ROI_Name'):
+                    roi_key='ROI_Name'
+                elif dictionary.has_key('VOI_Name'):
+                    roi_key='VOI_Name'
                 if key in settings_dict.keys():
-                    table_dict.update({((dictionary.get('ROI_Name')+"_"+ \
-                            settings_dict.get(key)),dictionary.get(key))})
+                    redcap_field_name = (dictionary.get(roi_key)+"_"+ \
+                         settings_dict.get(key)).replace(" ","_")
+                    table_dict.update({(redcap_field_name,dictionary.get(key))})
     return table_dict
 
 def format_stagnant_data(stagnant_data,settings_file):
@@ -117,6 +125,8 @@ def format_stagnant_data(stagnant_data,settings_file):
                   re.split(r":+",line)[1].strip())})
             if line_key=="Patient ID":
                 lines.update({("record_id",re.split(r":+",line)[1].strip())})
+                print settings_file.get('COMPLETE')
+                lines.update({(settings_file.get('COMPLETE'),u'2')})
     return lines
 
 
@@ -137,7 +147,7 @@ def upload_to_redcap(project,stagnant_data,formatted_data,OPTIONS):
     try:
         log_var= project.import_records(records,overwrite='normal' \
                                     ,return_format='json',date_format='MDY')
-        LOGGER.info("Upload COMPLETE!")
+        LOGGER.info("Upload COMPLETE! "+OPTIONS.path)
     except redcap.RedcapError as redcaperror:
         raise SystemExit(redcaperror)
     return log_var
