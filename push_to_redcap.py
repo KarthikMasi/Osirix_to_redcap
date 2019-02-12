@@ -17,7 +17,8 @@ def redcap_project_access(API_KEY):
     try:
         project = redcap.Project('https://redcap.vanderbilt.edu/api/', API_KEY)
     except:
-        raise SystemExit('ERROR: Could not access redcap. Either wrong API_URL/API_KEY or redcap down.')
+        LOGGER.error('ERROR: Could not access redcap. Either wrong API_URL/API_KEY or redcap down.')
+        sys.exit(1)
     return project
 
 def get_form_names(project):
@@ -43,7 +44,8 @@ def open_file(filepath):
         xl_file = open(filepath,"r")
         return xl_file
     except:
-        raise SystemExit("ERROR: Check path and permissions of file:"+filepath)
+        LOGGER.error("Check path and permissions of file:"+filepath)
+        sys.exit(1)
 
 def list_data_by_line(data):
     """
@@ -94,7 +96,7 @@ def get_values_and_variables(table_data,OPTIONS):
                 dictionary = dict(zip(headers,line))
             except UnboundLocalError:
                 LOGGER.error("The xls file corrupted "+ OPTIONS.path)
-                raise SystemExit("Soft Exit")
+                sys.exit(1)
             for key in dictionary.keys():
                 if dictionary.has_key('ROI_Name'):
                     roi_key='ROI_Name'
@@ -125,7 +127,6 @@ def format_stagnant_data(stagnant_data,settings_file):
                   re.split(r":+",line)[1].strip())})
             if line_key=="Patient ID":
                 lines.update({("record_id",re.split(r":+",line)[1].strip())})
-                print settings_file.get('COMPLETE')
                 lines.update({(settings_file.get('COMPLETE'),u'2')})
     return lines
 
@@ -149,7 +150,8 @@ def upload_to_redcap(project,stagnant_data,formatted_data,OPTIONS):
                                     ,return_format='json',date_format='MDY')
         LOGGER.info("Upload COMPLETE! "+OPTIONS.path)
     except redcap.RedcapError as redcaperror:
-        raise SystemExit(redcaperror)
+        LOGGER.error(str(redcaperror))
+        sys.exit(1)
     return log_var
 
 def read_settings_file(OPTIONS):
@@ -176,31 +178,33 @@ def add_to_parser():
     :return: parser object
     """
     parser = argparse.ArgumentParser(description='Crontabs manager')
-    parser.add_argument("-k","--key",dest='API_KEY',default=None, \
+    parser.add_argument("-k","--key",dest='API_KEY',default=None, required=True,\
                         help='API key to REDCap Database')
-    parser.add_argument("-f","--file",dest='path',default=None, \
+    parser.add_argument("-f","--file",dest='path',default=None, required=True,\
                         help = 'path of file that needs to be uploaded')
-    parser.add_argument("-s","--settings",dest='settings',default=None,\
+    parser.add_argument("-s","--settings",dest='settings',default=None, required=True,\
                         help='path to settings file of the study')
+    parser.add_argument("-l","--logfile",dest='log',default=None, required=True,\
+                        help='Log file path and name')
     return parser
 
 def execute():
     """
     point of execution
     """
-    LOGGER.basicConfig(level=LOGGER.DEBUG,\
+    parser = add_to_parser()
+    OPTIONS = parser.parse_args()
+    LOGGER.basicConfig(filename = OPTIONS.log,level=LOGGER.DEBUG,\
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',\
                        datefmt='%Y-%m-%d %H:%M:%S')
     console = LOGGER.StreamHandler()
     console.setLevel(LOGGER.INFO)
-    parser = add_to_parser()
-    OPTIONS = parser.parse_args()
     project = redcap_project_access(OPTIONS.API_KEY)
     forms = get_form_names(project)
     doc = open_file(OPTIONS.path)
     table_data,stagnant_data = list_data_by_line(doc)
     formatted_table_data = table_to_dict(table_data,OPTIONS)
-    log=upload_to_redcap(project,stagnant_data,formatted_table_data,OPTIONS)
+    count=upload_to_redcap(project,stagnant_data,formatted_table_data,OPTIONS)
 
 if __name__ == '__main__':
     execute()
