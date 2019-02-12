@@ -43,7 +43,7 @@ def open_file(filepath):
         xl_file = open(filepath,"r")
         return xl_file
     except:
-        raise SystemExit("ERROR: Check path and permissions of file you are trying to upload")
+        raise SystemExit("ERROR: Check path and permissions of file:"+filepath)
 
 def list_data_by_line(data):
     """
