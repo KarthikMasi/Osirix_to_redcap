@@ -23,7 +23,7 @@ def redcap_project_access(API_KEY):
 
 def get_form_names(project):
     """
-    Fetches all form objects from the REDCap project and converts unicode values 
+    Fetches all form objects from the REDCap project and converts unicode values
     to string
     :param project: redcap.Project object
     :return: list containing names of forms as string
@@ -90,12 +90,12 @@ def get_values_and_variables(table_data,OPTIONS):
         if "ROI" in line or "VOI" in line:
             headers = line
             headers = re.split(r'\t+',headers)
-        elif line!='':
+        elif re.sub(r"[\n\nt\s]*","",line)!='':
             line = re.split(r'\t+',line)
             try:
                 dictionary = dict(zip(headers,line))
             except UnboundLocalError:
-                LOGGER.error("The xls file corrupted "+ OPTIONS.path)
+                LOGGER.error("Corrupted File: "+ OPTIONS.path)
                 sys.exit(1)
             for key in dictionary.keys():
                 if dictionary.has_key('ROI_Name'):
