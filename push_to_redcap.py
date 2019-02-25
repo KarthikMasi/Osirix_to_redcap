@@ -85,6 +85,8 @@ def get_values_and_variables(table_data,OPTIONS):
     """
     table_values = []
     table_dict = {}
+    roi_temp=0
+    roi_no="-1"
     settings_dict = read_settings_file(OPTIONS)
     for line in table_data:
         if "ROI" in line or "VOI" in line:
@@ -103,8 +105,18 @@ def get_values_and_variables(table_data,OPTIONS):
                 elif dictionary.has_key('VOI_Name'):
                     roi_key='VOI_Name'
                 if key in settings_dict.keys():
-                    redcap_field_name = (dictionary.get(roi_key)+"_"+ \
+                    roi_slice = dictionary.get(roi_key).split('liver')[1].split('_')[1]
+                    if roi_no =="-1":
+                        roi_no = dictionary.get(roi_key).split('liver')[1].split('_')[0]
+                    else:
+                        diff = int(dictionary.get(roi_key).split('liver')[1].split('_')[0]) - int(roi_no)
+                        roi_temp = diff
+                    redcap_field_name = ("liver"+str(roi_temp)+"_"+str(roi_slice)+"_"+ \
                          settings_dict.get(key)).replace(" ","_")
+
+
+                    #redcap_field_name = (dictionary.get(roi_key)+"_"+ \
+                    #     settings_dict.get(key)).replace(" ","_")
                     table_dict.update({(redcap_field_name,dictionary.get(key))})
     return table_dict
 
