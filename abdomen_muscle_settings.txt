@@ -26,3 +26,4 @@ Mus1_std=muscle1_std
 Mus1_min=muscle1_min
 Mus1_max=muscle1_max
 COMPLETE=abdominal_muscle_analysis_complete
+UPLOAD=output_file_ab_musc

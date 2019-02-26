@@ -134,7 +134,8 @@ def format_stagnant_data(stagnant_data,settings_file):
 def upload_to_redcap(project,stagnant_data,formatted_data,OPTIONS):
     """
     Concatenates stagnant and table data in a dictionary. Adds dict to a list 
-    where multiple records may exist. Pushes the list to redcap
+    where multiple records may exist. Pushes the list to redcap. Also uploads
+    the full file to the database
     :param project:redcap Project
     :param stagnant_data:list of stagnant data
     :param formatted_data:dict of table data
@@ -144,12 +145,16 @@ def upload_to_redcap(project,stagnant_data,formatted_data,OPTIONS):
     redcap_dict = format_stagnant_data(stagnant_data,\
          settings_file = read_settings_file(OPTIONS))
     redcap_dict.update(formatted_data)
+    record_id=redcap_dict.get('record_id')
     records = [redcap_dict]
     try:
         log_var= project.import_records(records,overwrite='normal' \
                                     ,return_format='json',date_format='MDY')
-        LOGGER.info("Upload COMPLETE! "+OPTIONS.path)
-    except redcap.RedcapError as redcaperror:
+        LOGGER.info("Records Upload COMPLETE! "+OPTIONS.path)
+        response = project.import_file(record_id, read_settings_file(OPTIONS).get('UPLOAD'), \
+                                       OPTIONS.path, open(OPTIONS.path, "r"))
+        LOGGER.info("File uploaded to record: "+record_id)
+    except (redcap.RedcapError,ValueError) as redcaperror:
         LOGGER.error(str(redcaperror))
         sys.exit(1)
     return log_var

@@ -28,3 +28,4 @@ Actual number of ROIs=actual_rois_abd
 Start Slice Number=start_slice_number_abd
 End Slice Number=end_slice_number_abd
 COMPLETE=abdominal_fat_analysis_complete
+UPLOAD=output_file_ab_fat
