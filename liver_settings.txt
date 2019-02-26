@@ -14,3 +14,4 @@ Study Date=study_date_liver
 Image Modality=image_modality_liver
 Plugin Version=plugin_version_liver
 COMPLETE=liver_analysis_complete
+UPLOAD=outputfile_liver
