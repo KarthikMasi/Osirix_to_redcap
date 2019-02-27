@@ -103,7 +103,7 @@ def get_values_and_variables(table_data,OPTIONS):
                 elif dictionary.has_key('VOI_Name'):
                     roi_key='VOI_Name'
                 if key in settings_dict.keys():
-                    redcap_field_name = (dictionary.get(roi_key)+"_"+ \
+                    redcap_field_name = (dictionary.get(roi_key).lower()+"_"+ \
                          settings_dict.get(key)).replace(" ","_")
                     table_dict.update({(redcap_field_name,dictionary.get(key))})
     return table_dict
@@ -205,7 +205,6 @@ def execute():
     console = LOGGER.StreamHandler()
     console.setLevel(LOGGER.INFO)
     project = redcap_project_access(OPTIONS.API_KEY)
-    forms = get_form_names(project)
     doc = open_file(OPTIONS.path)
     table_data,stagnant_data = list_data_by_line(doc)
     formatted_table_data = table_to_dict(table_data,OPTIONS)
