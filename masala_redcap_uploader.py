@@ -31,7 +31,8 @@ def open_file(filepath):
     try:
         for file in os.listdir(filepath):
             if file.endswith(".csv"):
-                xl_file = open(filepath+file,"r")
+                filename=filepath+file
+                xl_file = open(filename,"r")
                 return xl_file,file.split(".csv")[0].split("Masala")[1]
     except:
         LOGGER.error("Check path and permissions of file:"+filepath+file)
@@ -51,7 +52,7 @@ def open_image(filepath):
         LOGGER.error("Check path and permissions of file:"+filepath+file)
         sys.exit(1)
 
-def csv_to_dict(csv_file):
+def csv_to_dict(csv_file,record_id):
     """
     Opens file and returns the file object ready to be read.
     :param filepath:string of path to file
@@ -77,7 +78,7 @@ def csv_to_dict(csv_file):
            ("area_cm2_"+str(line_number),line[15]),\
            ("num_of_points_"+str(line_number),line[16]),\
            })
-    redcap_dict.update({("record_id","20590-4716-CPR_LAD_3ROI")})
+    redcap_dict.update({("record_id",record_id)})
     redcap_dict.update({('masala_image_and_data_complete',u'2')})
     redcap_upload_ready_array=[redcap_dict] 
     return redcap_upload_ready_array
@@ -109,7 +110,7 @@ def execute():
     console.setLevel(LOGGER.INFO)
     project = redcap_project_access(OPTIONS.API_KEY)
     csv,record_name = open_file(OPTIONS.path)
-    redcap_record = csv_to_dict(csv)
+    redcap_record = csv_to_dict(csv,record_name)
     image_file_name = open_image(OPTIONS.path)
     print(OPTIONS.path)
     csv_file_name = ""+OPTIONS.path+"Masala"+record_name+".csv"
