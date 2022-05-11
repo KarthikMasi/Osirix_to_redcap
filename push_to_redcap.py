@@ -6,7 +6,7 @@ import os
 import sys 
 import argparse
 import logging as LOGGER
-
+import glob
 
 def open_file(filepath):
 	"""
@@ -33,7 +33,7 @@ def redcap_project_access(API_KEY):
         LOGGER.error('ERROR: Could not access redcap. Either wrong API_URL/API_KEY or redcap down.')
 
 def link_csv_to_redcap_variables(table_data):
-
+    
 def push_to_redcap(redcap_dict):
 
 def add_to_parser():
@@ -51,6 +51,16 @@ def add_to_parser():
 	return parser
 
 def execute():
+    parser = add_to_parser()
+    OPTIONS = parser.parse_args()
+    LOGGER.basicConfig(filename=OPTIONS.log, level=LOGGER.DEBUG,\
+           format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',\
+           datefmt='%Y-%m-%d %H:%M:%S')
+    console = LOGGER.StreamHandler()
+    console.setLevel(LOGGER.INFO)
+    project = redcap_project_access(OPTIONS.API_KEY)
+    csv_file = glob.glob(OPTIONS.path+"/*.csv")[0]
+    png_file = glob.glob(OPTIONS.path+"/*.png")[0]
 
 if __name__ == '__main__':
     execute()
