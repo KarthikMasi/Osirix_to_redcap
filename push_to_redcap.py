@@ -8,6 +8,10 @@ import argparse
 import logging as LOGGER
 import glob
 
+redcap_variables=['record_id','username','current_date','id','studyid',\
+ 'slice_thickness','muscle_area_surf','imat_area_surf','vat_area_surf',\
+ 'sat_area_surf','muscle_mean','imat_mean','vat_mean','sat_mean']
+
 def open_file(filepath):
 	"""
     Opens file and returns the file object ready to be read.
@@ -32,8 +36,17 @@ def redcap_project_access(API_KEY):
     except:
         LOGGER.error('ERROR: Could not access redcap. Either wrong API_URL/API_KEY or redcap down.')
 
-def link_csv_to_redcap_variables(table_data):
-    
+def link_csv_to_redcap_variables(csv_path,png_path,project):
+    """
+    """
+    try:
+        csv_file = open(csv_path,"r")
+    except:
+        LOGGER.error("Check path and permissions of file:" + csv_path)
+    all_lines = csv_file.read().splitlines()
+    lines_for_upload = all_lines[3:] #Removing the headers
+    record_id = png_path.spit('/')[-1].split('.')[0] 
+
 def push_to_redcap(redcap_dict):
 
 def add_to_parser():
