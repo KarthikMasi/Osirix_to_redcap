@@ -43,11 +43,25 @@ def link_csv_to_redcap_variables(csv_path,png_path,project):
         csv_file = open(csv_path,"r")
     except:
         LOGGER.error("Check path and permissions of file:" + csv_path)
+    redcap_upload_list=[]
     all_lines = csv_file.read().splitlines()
     lines_for_upload = all_lines[3:] #Removing the headers
     record_id = png_path.spit('/')[-1].split('.')[0] 
+    for line in all_lines:
+        records = line.split(',')
+        redcap_dict = {redcap_variables[0]:record_id,\
+          redcap_variables[1]:records[0],redcap_variables[2]:records[1],\
+          redcap_variables[3]:records[2],redcap_variables[4]:records[3],\
+          redcap_variables[5]:records[4],redcap_variables[6]:records[5],\
+          redcap_variables[7]:records[6],redcap_variables[8]:records[7],\
+          redcap_variables[9]:records[8],redcap_variables[10]:records[9],\
+          redcap_variables[11]:records[10],redcap_variables[12]:records[11],\
+          redcap_variables[13]:records[12]
+                }
+        redcap_update_list.append(redcap_dict)
+    return redcap_upload_list
 
-def push_to_redcap(redcap_dict):
+def push_to_redcap(redcap_list,project):
 
 def add_to_parser():
 	"""
