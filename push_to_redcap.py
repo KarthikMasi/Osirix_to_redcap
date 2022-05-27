@@ -156,6 +156,7 @@ def upload_to_redcap(project,stagnant_data,formatted_data,OPTIONS):
         LOGGER.info("File uploaded to record: "+record_id)
     except (redcap.RedcapError,ValueError) as redcaperror:
         LOGGER.error(str(redcaperror))
+        LOGGER.error(OPTIONS.path)
         sys.exit(1)
     return log_var
 

@@ -23,5 +23,5 @@ Expected number of ROIs=expected_rois_pericard
 Actual number of ROIs=actual_rois_pericard
 Start Slice Number=start_slice_pericard
 End Slice Number=end_slice_pericard
-COMPLETE=pericard_fat_analysis_complete
+COMPLETE=pericardial_fat_analysis_complete
 UPLOAD=output_file_pericard
