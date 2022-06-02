@@ -39,10 +39,10 @@ def link_csv_to_redcap_variables(csv_path,png_path,project):
     redcap_upload_list=[]
     all_lines = csv_file.read().splitlines()
     lines_for_upload = all_lines[3:] #Removing the headers
-    record_id = png_path.split('/')[-1].split('.')[0]
+    #record_id = png_path.split('/')[-1].split('.')[0]
     for line in lines_for_upload:
         records = line.split(',')
-        redcap_dict = {unicode(redcap_variables[0], "utf-8"):record_id,\
+        redcap_dict = {unicode(redcap_variables[0], "utf-8"):records[0],\
           redcap_variables[1]:records[0],redcap_variables[2]:records[1],\
           redcap_variables[3]:records[2],redcap_variables[4]:records[3],\
           redcap_variables[5]:records[4],redcap_variables[6]:records[5],\
