@@ -61,9 +61,9 @@ def push_to_redcap(redcap_list,csv_file,png_file,project,OPTIONS,record_id):
         log_var = project.import_records(redcap_list, overwrite='normal',\
                                 return_format='json', date_format='MDY')
         LOGGER.info("Records Upload COMPLETE! " + OPTIONS.path)
-        response_csv = project.import_file(record_id,'csv_file',csv_file,open(csv_file,"r"))
-        response_png = project.import_file(record_id,'png_file',png_file,open(png_file,"r"))
-        LOGGER.info("Files uploaded to record: " + record_id)
+        response_csv = project.import_file(redcap_list[0]['record_id'],'csv_file',csv_file,open(csv_file,"r"))
+        response_png = project.import_file(redcap_list[0]['record_id'],'png_file',png_file,open(png_file,"r"))
+        LOGGER.info("Files uploaded to record: " + redcap_list[0]['record_id'])
     except (redcap.RedcapError, ValueError) as redcaperror:
         LOGGER.error(str(redcaperror))
         LOGGER.error(OPTIONS.path)
