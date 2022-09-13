@@ -43,7 +43,7 @@ def link_csv_to_redcap_variables(csv_path,png_path,project):
     for line in lines_for_upload:
         line = line.decode('utf-8')
         records = line.split(',')
-        redcap_dict = {unicode(redcap_variables[0], "utf-8"):records[2],\
+        redcap_dict = {redcap_variables[0]:records[2].split('|')[2],\
           redcap_variables[1]:records[0],redcap_variables[2]:records[1],\
           redcap_variables[3]:records[2],redcap_variables[4]:records[3],\
           redcap_variables[5]:records[4],redcap_variables[6]:records[5],\
@@ -62,8 +62,8 @@ def push_to_redcap(redcap_list,csv_file,png_file,project,OPTIONS,record_id):
         log_var = project.import_records(redcap_list, overwrite='normal',\
                                 return_format='json', date_format='MDY')
         LOGGER.info("Records Upload COMPLETE! " + OPTIONS.path)
-        response_csv = project.import_file(redcap_list[0]['record_id'],'csv_file',csv_file,open(csv_file,"r"))
-        response_png = project.import_file(redcap_list[0]['record_id'],'png_file',png_file,open(png_file,"r"))
+        response_csv = project.import_file(redcap_list[0]['record_id'],'csv_file',csv_file,open(csv_file,"rb"))
+        response_png = project.import_file(redcap_list[0]['record_id'],'png_file',png_file,open(png_file,"rb"))
         LOGGER.info("Files uploaded to record: " + redcap_list[0]['record_id'])
     except (redcap.RedcapError, ValueError) as redcaperror:
         LOGGER.error(str(redcaperror))
