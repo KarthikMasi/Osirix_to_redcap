@@ -1,0 +1,17 @@
+Tot_area=total_area
+Tot_max=total_max
+Tot_mean=total_mean
+Tot_std=total_std
+Tot_min=total_min
+Analyst=analyst_liver
+Slice Thickness=slice_thickness_liver
+Analyst Date=analysis_date_liver
+Patient ID=patient_id_liver
+Study ID=study_id_liver
+Series Number=series_number_liver
+SOP Instance UID=sop_instance_uid_liver
+Study Date=study_date_liver
+Image Modality=image_modality_liver
+Plugin Version=plugin_version_liver
+COMPLETE=liver_analysis_complete
+UPLOAD=outputfile_liver
