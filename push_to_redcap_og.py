@@ -125,9 +125,12 @@ def format_stagnant_data(stagnant_data,settings_file):
             if line_key in settings_file.keys():
                 lines.update({(settings_file.get(line_key), \
                   re.split(r":+",line)[1].strip())})
-            if line_key=="Patient ID":
+            if line_key=="Patient ID" and "|" in line:
                 lines.update({("record_id",re.split(r"\|",line)[2].strip())})
                 lines.update({(settings_file.get('COMPLETE'),u'2')})
+            elif line_key=="Patient ID" and "|" not in line:
+                lines.update({("record_id", re.split(r":+", line)[1].strip())})
+                lines.update({(settings_file.get('COMPLETE'), u'2')})
     return lines
 
 
